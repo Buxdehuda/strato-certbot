@@ -20,6 +20,8 @@ def main():
     http_session = requests.session()
 
     # request session id
+
+    request = http_session.get(api_url)
     request = http_session.post(api_url, { "identifier": username, "passwd": password, "action_customer_login.x": "Login" })
     session_id = re.search(r"sessionID=(.*?)\"", request.text).group(1)
 
