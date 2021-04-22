@@ -14,7 +14,7 @@ def main():
     api_url = "https://www.strato.de/apps/CustomerService"
     txt_key = "_acme-challenge"
     txt_value = os.environ["CERTBOT_VALIDATION"]
-    domain_name = re.search(r"(\w+\.\w+)$", os.environ["CERTBOT_DOMAIN"]).group(1)
+    domain_name = re.search(r"([^.]+\.\w+)$", os.environ["CERTBOT_DOMAIN"]).group(1)
 
     # setup session for cookie sharing
     http_session = requests.session()
