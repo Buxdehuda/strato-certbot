@@ -8,7 +8,7 @@ import requests
 
 def main():
     # get authentication
-    with open("strato-auth.json") as file:
+    with open(os.path.dirname(__file__) + os.path.normcase("/strato-auth.json")) as file:
         auth = json.load(file)
         username = auth['username']
         password = auth['password']
