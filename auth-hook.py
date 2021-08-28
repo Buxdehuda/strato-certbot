@@ -30,10 +30,19 @@ def main():
     })
     session_id = re.search(r'sessionID=(.*?)"', request.text).group(1)
 
+    # request strato packages
+    request = http_session.get(api_url, params={
+        'sessionID': session_id,
+        'node': "kds_CustomerEntryPage"
+    })
+    m = re.search(r'<div class="cep_product">\s*<a class="customer-link" href="[^"]*cID=(?P<cID>\d+)'
+                  r'.*<span [^>]*>[^\/]*' + domain_name.replace('.', '\.'), request.text)
+    cID = m.group("cID")
+
     # request current cname/txt records
     request = http_session.get(api_url, params={
         'sessionID': session_id,
-        'cID': "1",
+        'cID': cID,
         'node': "ManageDomains",
         'action_show_txt_records': '',
         'vhost': domain_name
@@ -64,7 +73,7 @@ def main():
     # set records
     http_session.post(api_url, {
         'sessionID': session_id,
-        'cID': "1",
+        'cID': cID,
         'node': "ManageDomains",
         'vhost': domain_name,
         'spf_type': "NONE",
