@@ -16,7 +16,8 @@ def main():
     api_url = "https://www.strato.de/apps/CustomerService"
     txt_key = "_acme-challenge"
     txt_value = os.environ['CERTBOT_VALIDATION']
-    domain_name = re.search(r'([^.]+\.\w+)$', os.environ['CERTBOT_DOMAIN']).group(1)
+    second_level_domain_name = re.search(r'([^.]+\.\w+)$', os.environ['CERTBOT_DOMAIN']).group(1)
+    domain_name = re.search(r'^(\*\.)?([\w\.]+)$', os.environ['CERTBOT_DOMAIN']).group(2)
 
     # setup session for cookie sharing
     http_session = requests.session()
@@ -36,7 +37,7 @@ def main():
         'node': "kds_CustomerEntryPage"
     })
     m = re.search(r'<div class="cep_product">\s*<a class="customer-link" href="[^"]*cID=(?P<cID>\d+)'
-                  r'.*<span [^>]*>[^\/]*' + domain_name.replace('.', '\.'), request.text)
+                  r'.*<span [^>]*>[^\/]*' + second_level_domain_name.replace('.', '\.'), request.text)
     cID = m.group("cID")
 
     # request current cname/txt records
