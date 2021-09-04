@@ -19,6 +19,11 @@ def main():
     second_level_domain_name = re.search(r'([^.]+\.\w+)$', os.environ['CERTBOT_DOMAIN']).group(1)
     domain_name = re.search(r'^(\*\.)?([\w\.]+)$', os.environ['CERTBOT_DOMAIN']).group(2)
 
+    print('INFO: txt_key: %s' % (txt_key))
+    print('INFO: txt_value: %s' % (txt_value))
+    print('INFO: second_level_domain_name: %s' % (second_level_domain_name))
+    print('INFO: domain_name: %s' % (domain_name))
+
     # setup session for cookie sharing
     http_session = requests.session()
 
@@ -38,7 +43,11 @@ def main():
     })
     m = re.search(r'<div class="cep_product">\s*<a class="customer-link" href="[^"]*cID=(?P<cID>\d+)'
                   r'.*<span [^>]*>[^\/]*' + second_level_domain_name.replace('.', '\.'), request.text)
+    if m is None:
+        print('ERROR: Domain %s not found in strato packages' % (domain_name))
+        exit(1)
     cID = m.group("cID")
+    print('INFO: strato package id (cID): ' + cID)
 
     # request current cname/txt records
     request = http_session.get(api_url, params={
@@ -60,6 +69,9 @@ def main():
             'value': m.group('value')
         })
 
+    print('INFO: Current cname/txt records:')
+    [print("INFO: - %s %s: %s"%(item['prefix'],item['type'],item['value'])) for item in records]
+
     # add/replace txt record
     for i in reversed(range(len(records))):
         if records[i]['prefix'] == txt_key and records[i]['type'] == "TXT":
@@ -70,6 +82,9 @@ def main():
         'type': "TXT",
         'value': txt_value,
     })
+
+    print('INFO: New cname/txt records:')
+    [print("INFO: - %s %s: %s"%(item['prefix'],item['type'],item['value'])) for item in records]
 
     # set records
     http_session.post(api_url, {
