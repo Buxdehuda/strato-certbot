@@ -34,7 +34,12 @@ def main():
         'passwd': password,
         'action_customer_login.x': "Login"
     })
-    session_id = re.search(r'sessionID=(.*?)"', request.text).group(1)
+    result = re.search(r'sessionID=(\w+)', request.url)
+    if not result:
+        print("ERROR: Strato login not accepted.")
+        exit(1)
+    session_id = result.group(1)
+    print('DEBUG: session_id: %s' % (session_id))
 
     # request strato packages
     request = http_session.get(api_url, params={
