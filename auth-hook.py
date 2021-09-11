@@ -16,8 +16,8 @@ def main():
     api_url = "https://www.strato.de/apps/CustomerService"
     txt_key = "_acme-challenge"
     txt_value = os.environ['CERTBOT_VALIDATION']
-    second_level_domain_name = re.search(r'([^.]+\.\w+)$', os.environ['CERTBOT_DOMAIN']).group(1)
-    domain_name = re.search(r'^(\*\.)?([\w\.]+)$', os.environ['CERTBOT_DOMAIN']).group(2)
+    domain_name = os.environ['CERTBOT_DOMAIN']
+    second_level_domain_name = re.search(r'(\w+\.\w+)$', domain_name).group(1)
 
     print('INFO: txt_key: %s' % (txt_key))
     print('INFO: txt_value: %s' % (txt_value))
