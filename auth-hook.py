@@ -44,6 +44,7 @@ def main():
     # request strato packages
     request = http_session.get(api_url, params={
         'sessionID': session_id,
+        'cID': 0,
         'node': "kds_CustomerEntryPage"
     })
     m = re.search(r'<div class="cep_product">\s*<a class="customer-link" href="[^"]*cID=(?P<cID>\d+)'
