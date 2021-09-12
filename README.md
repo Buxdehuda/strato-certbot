@@ -20,7 +20,7 @@ Make sure to make this file only readable for root:
 
 Run Certbot in manual mode:
 
-`sudo certbot certonly --manual --preferred-challenges dns --manual-auth-hook ./auth-hook.py -d example.com -d *.example.com`
+`sudo certbot certonly --manual --preferred-challenges dns --manual-auth-hook ./auth-hook.py --manual-cleanup-hook ./cleanup-hook.py -d example.com -d *.example.com`
 
 This will generate a wildcard certificate for your domain without the need to manually enter the TXT records.
 
