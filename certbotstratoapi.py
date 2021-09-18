@@ -11,18 +11,17 @@ class CertbotStratoApi:
 
     def __init__(self):
         """ Initializes the data structure """
-        self.api_url = "https://www.strato.de/apps/CustomerService"
-        self.txt_key = "_acme-challenge"
+        self.api_url = 'https://www.strato.de/apps/CustomerService'
+        self.txt_key = '_acme-challenge'
         self.txt_value = os.environ['CERTBOT_VALIDATION']
         self.domain_name = os.environ['CERTBOT_DOMAIN']
         self.second_level_domain_name = re.search(r'(\w+\.\w+)$',
             self.domain_name).group(1)
 
-        print('INFO: txt_key: %s' % (self.txt_key))
-        print('INFO: txt_value: %s' % (self.txt_value))
-        print('INFO: second_level_domain_name: %s'
-            % (self.second_level_domain_name))
-        print('INFO: domain_name: %s' % (self.domain_name))
+        print(f'INFO: txt_key: {self.txt_key}')
+        print(f'INFO: txt_value: {self.txt_value}')
+        print(f'INFO: second_level_domain_name: {self.second_level_domain_name}')
+        print(f'INFO: domain_name: {self.domain_name}')
 
         # setup session for cookie sharing
         self.http_session = requests.session()
@@ -37,8 +36,8 @@ class CertbotStratoApi:
         """Login to Strato website. Requests session ID.
 
         :param str username: Username or customer number of
-                "STRATO Customer Login"
-        :param str password: Password of "STRATO Customer Login"
+                'STRATO Customer Login'
+        :param str password: Password of 'STRATO Customer Login'
 
         :returns: Successful login
         :rtype: bool
@@ -49,13 +48,13 @@ class CertbotStratoApi:
         request = self.http_session.post(self.api_url, {
             'identifier': username,
             'passwd': password,
-            'action_customer_login.x': "Login"
+            'action_customer_login.x': 'Login'
         })
         result = re.search(r'sessionID=(\w+)', request.url)
         if not result:
             return False
         self.session_id = result.group(1)
-        print('DEBUG: session_id: %s' % (self.session_id))
+        print(f'DEBUG: session_id: {self.session_id}')
         return True
 
 
@@ -65,7 +64,7 @@ class CertbotStratoApi:
         request = self.http_session.get(self.api_url, params={
             'sessionID': self.session_id,
             'cID': 0,
-            'node': "kds_CustomerEntryPage",
+            'node': 'kds_CustomerEntryPage',
         })
         result = re.search(
             r'<div class="cep_product">\s*<a class="customer-link" href='
@@ -75,11 +74,11 @@ class CertbotStratoApi:
             )
 
         if result is None:
-            print('ERROR: Domain %s not found in strato packages'
-                % (self.second_level_domain_name))
+            print(f'ERROR: Domain {self.second_level_domain_name} not '
+                'found in strato packages')
             sys.exit(1)
-        self.package_id = result.group("cID")
-        print('INFO: strato package id (cID): ' + self.package_id)
+        self.package_id = result.group('cID')
+        print(f'INFO: strato package id (cID): {self.package_id}')
 
 
     def get_txt_records(self) -> None:
@@ -87,7 +86,7 @@ class CertbotStratoApi:
         request = self.http_session.get(self.api_url, params={
             'sessionID': self.session_id,
             'cID': self.package_id,
-            'node': "ManageDomains",
+            'node': 'ManageDomains',
             'action_show_txt_records': '',
             'vhost': self.domain_name
         })
@@ -105,8 +104,7 @@ class CertbotStratoApi:
             })
 
         print('INFO: Current cname/txt records:')
-        list(print("INFO: - %s %s: %s"%(
-            item['prefix'],item['type'],item['value']))
+        list(print(f'INFO: - {item["prefix"]} {item["type"]}: {item["value"]}')
             for item in self.records)
 
 
@@ -152,17 +150,17 @@ class CertbotStratoApi:
     def push_txt_records(self) -> None:
         """Push modified txt records to Strato."""
         print('INFO: New cname/txt records:')
-        list(print("INFO: - %s %s: %s"%(item['prefix'],item['type'],item['value']))
+        list(print(f'INFO: - {item["prefix"]} {item["type"]}: {item["value"]}')
             for item in self.records)
 
         self.http_session.post(self.api_url, {
             'sessionID': self.session_id,
             'cID': self.package_id,
-            'node': "ManageDomains",
+            'node': 'ManageDomains',
             'vhost': self.domain_name,
-            'spf_type': "NONE",
+            'spf_type': 'NONE',
             'prefix': [r['prefix'] for r in self.records],
             'type': [r['type'] for r in self.records],
             'value': [r['value'] for r in self.records],
-            'action_change_txt_records': "Einstellung+übernehmen",
+            'action_change_txt_records': 'Einstellung+übernehmen',
         })
