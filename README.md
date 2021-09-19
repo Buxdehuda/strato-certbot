@@ -16,6 +16,19 @@ Make sure to make this file only readable for root:
 
 `sudo chmod 0400 ./strato-auth.json`
 
+### Two-Factor Authentification
+
+To be able to authenticate two-factor, device name and TOTP secret must be entered into the JSON. If it is not used, it can either be empty strings or the entries can be removed completely (see above).
+
+```json
+{
+  "username": "<username>",
+  "password": "<password>",
+  "totp_secret": "<secret>",
+  "totp_devicename": "<devicename>"
+}
+```
+
 ## Get certificate
 
 Run Certbot in manual mode:

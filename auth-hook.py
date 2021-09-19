@@ -11,16 +11,18 @@ def main():
     """Run authentification hook."""
     # get authentication data
     with open(
-            os.path.dirname(__file__) + os.path.normcase("/strato-auth.json"),
+            os.path.dirname(__file__) + os.path.normcase('/strato-auth.json'),
             encoding='UTF-8',
             ) as file:
         auth = json.load(file)
-        username = auth['username']
-        password = auth['password']
+        username = auth.get('username')
+        password = auth.get('password')
+        totp_secret = auth.get('totp_secret')
+        totp_devicename = auth.get('totp_devicename')
 
     strato = CertbotStratoApi()
-    if not strato.login(username, password):
-        print("ERROR: Strato login not accepted.")
+    if not strato.login(username, password, totp_secret, totp_devicename):
+        print('ERROR: Strato login not accepted.')
         sys.exit(1)
     # Requests package id which package contains domain to be verified
     strato.get_package_id()
@@ -32,5 +34,5 @@ def main():
     strato.push_txt_records()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
