@@ -15,11 +15,13 @@ def main():
             encoding='UTF-8',
             ) as file:
         auth = json.load(file)
-        username = auth['username']
-        password = auth['password']
+        username = auth.get('username')
+        password = auth.get('password')
+        totp_secret = auth.get('totp_secret')
+        totp_devicename = auth.get('totp_devicename')
 
     strato = CertbotStratoApi()
-    if not strato.login(username, password):
+    if not strato.login(username, password, totp_secret, totp_devicename):
         print('ERROR: Strato login not accepted.')
         sys.exit(1)
     # Requests package id which package contains domain to be verified
