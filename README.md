@@ -14,7 +14,7 @@ Create `strato-auth.json`:
 
 Make sure to make this file only readable for root:
 
-`sudo chmod 0400 ./strato-auth.json`
+`sudo chmod 0400 strato-auth.json`
 
 ### Two-Factor Authentification
 
@@ -33,8 +33,6 @@ To be able to authenticate two-factor, device name and TOTP secret must be enter
 
 Run Certbot in manual mode:
 
-`sudo certbot certonly --manual --preferred-challenges dns --manual-auth-hook ./auth-hook.py --manual-cleanup-hook ./cleanup-hook.py -d example.com -d *.example.com`
+`sudo certbot certonly --manual --preferred-challenges dns --manual-auth-hook $(pwd)/auth-hook.py --manual-cleanup-hook $(pwd)/cleanup-hook.py -d example.com -d *.example.com`
 
 This will generate a wildcard certificate for your domain without the need to manually enter the TXT records.
-
-__NOTE:__ The python files need to be referenced by the absolute path if you want to use `certbot renew`
