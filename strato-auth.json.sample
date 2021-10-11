@@ -1,6 +1,6 @@
 {
     "username": "12345678",
-    "password": "Admin123;)"
+    "password": "Admin123;)",
     "totp_secret": "",
     "totp_devicename": ""
 }
