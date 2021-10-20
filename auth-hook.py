@@ -3,6 +3,7 @@
 import json
 import os
 import sys
+import time
 
 from certbotstratoapi import CertbotStratoApi
 
@@ -32,6 +33,8 @@ def main():
     strato.set_amce_record()
     # Sets all TXT/CNAME/SPF/DKIM records with AMCE record in dns server
     strato.push_txt_records()
+    # Sleep 10 Seconds to give the DNS Server time to get ready
+    time.sleep(10)
 
 
 if __name__ == '__main__':
