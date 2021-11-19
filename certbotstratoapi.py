@@ -215,7 +215,6 @@ class CertbotStratoApi:
 
     def set_amce_record(self) -> None:
         """Set or replace AMCE txt record on domain."""
-        self.remove_txt_record(self.txt_key, 'TXT')
         self.add_txt_record(self.txt_key, 'TXT', self.txt_value)
 
 
