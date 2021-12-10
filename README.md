@@ -29,6 +29,18 @@ To be able to authenticate two-factor, device name and TOTP secret must be enter
 }
 ```
 
+### Waiting time
+
+Sometimes it takes a while until the desired DNS record is published, which allows Certbot to verify the domain. To prevent this, a waiting time can be set.
+
+```json
+{
+  "username": "<username>",
+  "password": "<password>",
+  "waiting_time": <seconds>
+}
+```
+
 ## Get certificate
 
 Run Certbot in manual mode:

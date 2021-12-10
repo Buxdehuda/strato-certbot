@@ -20,6 +20,10 @@ def main():
         password = auth.get('password')
         totp_secret = auth.get('totp_secret')
         totp_devicename = auth.get('totp_devicename')
+        if auth.get('waiting_time', 0).isdigit():
+            waiting_time = int(auth.get('waiting_time', 0))
+        else:
+            waiting_time = 0
 
     strato = CertbotStratoApi()
     if not strato.login(username, password, totp_secret, totp_devicename):
@@ -33,8 +37,8 @@ def main():
     strato.set_amce_record()
     # Sets all TXT/CNAME/SPF/DKIM records with AMCE record in dns server
     strato.push_txt_records()
-    # Sleep 10 Seconds to give the DNS Server time to get ready
-    time.sleep(10)
+    # Sleep to give the DNS Server time to get ready
+    time.sleep(waiting_time)
 
 
 if __name__ == '__main__':
