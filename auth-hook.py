@@ -20,10 +20,7 @@ def main():
         password = auth.get('password')
         totp_secret = auth.get('totp_secret')
         totp_devicename = auth.get('totp_devicename')
-        if auth.get('waiting_time', 0).isdigit():
-            waiting_time = int(auth.get('waiting_time', 0))
-        else:
-            waiting_time = 0
+        waiting_time = auth.get('waiting_time', 0)
 
     strato = CertbotStratoApi()
     if not strato.login(username, password, totp_secret, totp_devicename):
