@@ -144,8 +144,8 @@ class CertbotStratoApi:
             'node': 'kds_CustomerEntryPage',
         })
         result = re.search(
-            r'<div class="cep_product">\s*<a class="customer-link" href='
-            r'"[^"]*cID=(?P<cID>\d+).*<span [^>]*>[^\/]*'
+            r'<a class="customer-link" href="[^"]*cID=(?P<cID>\d+)[^"]*">\s*'
+            r'<span class="jss_own_packagename">'
             + self.second_level_domain_name.replace('.', r'\.'),
             request.text
             )
@@ -201,7 +201,7 @@ class CertbotStratoApi:
 
 
     def remove_txt_record(self, prefix: str, record_type: str) -> None:
-        """Add a txt/cname record.
+        """Remove a txt/cname record.
 
         :param prefix str: Prefix of record
         :param record_type str: Type of record ('TXT' or 'CNAME')
