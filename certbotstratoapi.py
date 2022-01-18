@@ -144,11 +144,19 @@ class CertbotStratoApi:
             'node': 'kds_CustomerEntryPage',
         })
         result = re.search(
-            r'<a class="customer-link" href="[^"]*cID=(?P<cID>\d+)[^"]*">\s*'
-            r'<span class="jss_own_packagename">'
+            r'<div class="cep_product">\s*<a class="customer-link" href='
+            r'"[^"]*cID=(?P<cID>\d+).*<span [^>]*>[^\/]*'
             + self.second_level_domain_name.replace('.', r'\.'),
             request.text
             )
+        # fallback: search for domain in packagename
+        if result is None:
+            result = re.search(
+                r'<a class="customer-link" href="[^"]*cID=(?P<cID>\d+)[^"]*">\s*'
+                r'<span class="jss_own_packagename">'
+                + self.second_level_domain_name.replace('.', r'\.'),
+                request.text
+                )
 
         if result is None:
             print(f'ERROR: Domain {self.second_level_domain_name} not '
