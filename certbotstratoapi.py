@@ -16,7 +16,7 @@ class CertbotStratoApi:
         self.txt_key = '_acme-challenge'
         self.txt_value = os.environ['CERTBOT_VALIDATION']
         self.domain_name = os.environ['CERTBOT_DOMAIN']
-        self.second_level_domain_name = re.search(r'(\w+\.\w+)$',
+        self.second_level_domain_name = re.search(r'([\w-]+\.[\w-]+)$',
             self.domain_name).group(1)
 
         print(f'INFO: txt_key: {self.txt_key}')
@@ -115,7 +115,7 @@ class CertbotStratoApi:
 
         """
         # request session id
-        request = self.http_session.get(self.api_url)
+        self.http_session.get(self.api_url)
         request = self.http_session.post(self.api_url, {
             'identifier': username,
             'passwd': password,
@@ -144,19 +144,11 @@ class CertbotStratoApi:
             'node': 'kds_CustomerEntryPage',
         })
         result = re.search(
-            r'<div class="cep_product">\s*<a class="customer-link" href='
-            r'"[^"]*cID=(?P<cID>\d+).*<span [^>]*>[^\/]*'
-            + self.second_level_domain_name.replace('.', r'\.'),
-            request.text
+            r'<div class="package-information"> <span\s+class="domains_\d+_long">.+?'
+            + self.second_level_domain_name.replace('.', r'\.')
+            + r'.+?cID=(?P<cID>\d+)',
+            request.text.replace('\n', ' ')
             )
-        # fallback: search for domain in packagename
-        if result is None:
-            result = re.search(
-                r'<a class="customer-link" href="[^"]*cID=(?P<cID>\d+)[^"]*">\s*'
-                r'<span class="jss_own_packagename">'
-                + self.second_level_domain_name.replace('.', r'\.'),
-                request.text
-                )
 
         if result is None:
             print(f'ERROR: Domain {self.second_level_domain_name} not '
