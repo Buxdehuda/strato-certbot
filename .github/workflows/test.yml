@@ -22,4 +22,4 @@ jobs:
           pip install pytest requests-mock
           pip install -r requirements.txt
       - name: Test with pytest
-        run: pytest -vv
+        run: python -m pytest -vv
