@@ -18,6 +18,7 @@ def test_parse_second_level_domain(test_input, expected):
 
     assert strato.second_level_domain_name == expected
 
+
 @pytest.mark.parametrize("test_input,expected", [
     ('test.domain-a.de', '7'),
     ('test.domain-b.de', '6'),
