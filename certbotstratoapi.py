@@ -144,7 +144,7 @@ class CertbotStratoApi:
             'node': 'kds_CustomerEntryPage',
         })
         result = re.search(
-            r'<div class="package-information"> <span\s+class="domains_\d+_long">.+?'
+            r'<div class="package-information">\s+<span\s+class="domains_\d+_long">.+?'
             + self.second_level_domain_name.replace('.', r'\.')
             + r'.+?cID=(?P<cID>\d+)',
             request.text.replace('\n', ' ')
