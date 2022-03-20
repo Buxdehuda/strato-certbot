@@ -26,7 +26,12 @@ def test_parse_second_level_domain(test_input, expected):
     ('test/projectPage.html', 'test.domain-d.de', '4'),
     ('test/projectPage.html', 'test.domain-e.de', '2'),
     ('test/projectPage.html', 'test.domain-f.de', '2'),
-    ('test/projectPage.html', 'test.domain-g.de', '1')
+    ('test/projectPage.html', 'test.domain-g.de', '1'),
+    ('test/multiple_domains_in_package.html', 'test.domain-a.de', '1'),
+    ('test/multiple_domains_in_package.html', 'test.domain-b.com', '1'),
+    ('test/multiple_domains_in_package.html', 'test.domain-c.eu', '1'),
+    ('test/multiple_domains_in_package.html', 'test.domain-d.com', '1'),
+    ('test/multiple_domains_in_package.html', 'test.domain-e.com', '1')
 ])
 def test_get_package_id(test_file, test_input, expected, requests_mock):
     project_page = open(test_file, 'r').read()
