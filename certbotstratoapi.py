@@ -168,11 +168,11 @@ class CertbotStratoApi:
             'vhost': self.domain_name
         })
         for record in re.finditer(
-                r'<input [^>]*value="(?P<prefix>[^"]*)"[^>]*'
-                r'name="prefix"[^>]*>.*<select [^>]*name="type"[^>]*>.*'
-                r'<option[^>]*value="(?P<type>[^"]*)"[^>]*selected[^>]*>.*'
-                r'</select>.*<textarea [^>]*name="value"[^>]*>(?P<value>.*)'
-                r'</textarea>',
+                r'<select [^>]*name="type"[^>]*>.*?'
+                r'<option[^>]*value="(?P<type>[^"]*)"[^>]*selected[^>]*>'
+                r'.*?</select>.*?'
+                r'<input [^>]*value="(?P<prefix>[^"]*)"[^>]*name="prefix"[^>]*>'
+                r'.*?<textarea [^>]*name="value"[^>]*>(?P<value>.*?)</textarea>',
                 request.text):
             self.records.append({
                 'prefix': record.group('prefix'),
