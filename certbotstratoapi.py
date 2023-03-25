@@ -50,9 +50,7 @@ class CertbotStratoApi:
 
         """
         # Is 2FA used
-        if (not response.text.__contains__(
-            '<h1>Zwei-Faktor-Authentifizierung</h1>')
-            ):
+        if not re.search(r'<h1>\s*Zwei-Faktor-Authentifizierung\s*<\/h1>', response.text):
             print('INFO: 2FA is not used.')
             return response
         if (not totp_secret) or (not totp_devicename):
