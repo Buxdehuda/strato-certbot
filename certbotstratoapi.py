@@ -152,6 +152,7 @@ class CertbotStratoApi:
             print(f'ERROR: Domain {self.second_level_domain_name} not '
                 'found in strato packages')
             sys.exit(1)
+            return
         self.package_id = result.group('cID')
         print(f'INFO: strato package id (cID): {self.package_id}')
 
