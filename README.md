@@ -48,3 +48,23 @@ Run Certbot in manual mode:
 `sudo certbot certonly --manual --preferred-challenges dns --manual-auth-hook $(pwd)/auth-hook.py --manual-cleanup-hook $(pwd)/cleanup-hook.py -d example.com -d *.example.com`
 
 This will generate a wildcard certificate for your domain without the need to manually enter the TXT records.
+
+## Docker
+
+The Dockerfile wraps these hook scripts into a certbot runtime
+
+### Setup
+
+Edit and copy the certbot.env.sample to certbot.env
+
+### Build
+
+Run `./build.sh`
+
+### Run
+
+Run `./run.sh`
+
+### Get certificates
+
+A docker volume named "letsencrypt" will be created, the certificates can be found there ( `docker volume inspect letsencrypt` )
