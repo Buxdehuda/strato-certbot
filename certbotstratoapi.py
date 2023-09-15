@@ -12,9 +12,9 @@ class CertbotStratoApi:
 
     def __init__(self, api_url=None):
         """ Initializes the data structure """
-        if api_url is None
+        if api_url is None:
             self.api_url = 'https://www.strato.de/apps/CustomerService'
-        else
+        else:
             self.api_url = api_url
         self.txt_key = '_acme-challenge'
         self.txt_value = os.environ['CERTBOT_VALIDATION']
