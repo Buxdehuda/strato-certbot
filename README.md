@@ -7,6 +7,7 @@ Create `strato-auth.json`:
 
 ```json
 {
+  "api_url": "https://www.strato.de/apps/CustomerService",
   "username": "<username>",
   "password": "<password>"
 }
@@ -22,6 +23,7 @@ To be able to authenticate two-factor, device name and TOTP secret must be enter
 
 ```json
 {
+  "api_url": "https://www.strato.de/apps/CustomerService",
   "username": "<username>",
   "password": "<password>",
   "totp_secret": "<secret>",
@@ -35,6 +37,7 @@ Sometimes it takes a while until the desired DNS record is published, which allo
 
 ```json
 {
+  "api_url": "https://www.strato.de/apps/CustomerService",
   "username": "<username>",
   "password": "<password>",
   "waiting_time": <seconds>
