@@ -21,8 +21,9 @@ def main():
         totp_secret = auth.get('totp_secret')
         totp_devicename = auth.get('totp_devicename')
         waiting_time = auth.get('waiting_time', 0)
+        api_url = auth.get('api_url')
 
-    strato = CertbotStratoApi()
+    strato = CertbotStratoApi(api_url)
     if not strato.login(username, password, totp_secret, totp_devicename):
         print('ERROR: Strato login not accepted.')
         sys.exit(1)

@@ -7,10 +7,14 @@ Create `strato-auth.json`:
 
 ```json
 {
+  "api_url": "https://www.strato.de/apps/CustomerService",
   "username": "<username>",
   "password": "<password>"
 }
 ```
+
+The api url needs to be filled with the correct url from your country. 
+So as an example for Germany its 'https://www.strato.de/apps/CustomerService', but for the Netherlands its 'https://www.strato.nl/apps/CustomerService#skl'
 
 Make sure to make this file only readable for root:
 
@@ -22,6 +26,7 @@ To be able to authenticate two-factor, device name and TOTP secret must be enter
 
 ```json
 {
+  "api_url": "https://www.strato.de/apps/CustomerService",
   "username": "<username>",
   "password": "<password>",
   "totp_secret": "<secret>",
@@ -35,6 +40,7 @@ Sometimes it takes a while until the desired DNS record is published, which allo
 
 ```json
 {
+  "api_url": "https://www.strato.de/apps/CustomerService",
   "username": "<username>",
   "password": "<password>",
   "waiting_time": <seconds>

@@ -10,9 +10,12 @@ import requests
 class CertbotStratoApi:
     """Class to validate domains for Certbot with dns-01 challange"""
 
-    def __init__(self):
+    def __init__(self, api_url=None):
         """ Initializes the data structure """
-        self.api_url = 'https://www.strato.de/apps/CustomerService'
+        if api_url is None:
+            self.api_url = 'https://www.strato.de/apps/CustomerService'
+        else:
+            self.api_url = api_url
         self.txt_key = '_acme-challenge'
         self.txt_value = os.environ['CERTBOT_VALIDATION']
         self.domain_name = os.environ['CERTBOT_DOMAIN']
