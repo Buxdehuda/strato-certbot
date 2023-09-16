@@ -13,6 +13,9 @@ Create `strato-auth.json`:
 }
 ```
 
+The api url needs to be filled with the correct url from your country. 
+So as an example for Germany its 'https://www.strato.de/apps/CustomerService', but for the Netherlands its 'https://www.strato.nl/apps/CustomerService#skl'
+
 Make sure to make this file only readable for root:
 
 `sudo chmod 0400 strato-auth.json`
