@@ -153,8 +153,8 @@ class CertbotStratoApi:
 
         if result is None:
             print(f'ERROR: Domain {self.second_level_domain_name} not '
-                'found in strato packages')
-            sys.exit(1)
+                'found in strato packages. Using fallback cID=1')
+            self.package_id = 1
             return
         self.package_id = result.group('cID')
         print(f'INFO: strato package id (cID): {self.package_id}')
