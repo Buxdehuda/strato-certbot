@@ -1,10 +1,11 @@
 """Certbot-Strato-API Class"""
 import os
 import re
-import sys
+import urllib
 
 import pyotp
 import requests
+from bs4 import BeautifulSoup
 
 
 class CertbotStratoApi:
@@ -53,7 +54,8 @@ class CertbotStratoApi:
 
         """
         # Is 2FA used
-        if not re.search(r'<h1>\s*Zwei-Faktor-Authentifizierung\s*<\/h1>', response.text):
+        soup = BeautifulSoup(response.text, 'html.parser')
+        if soup.find('h1', string=re.compile('Zwei\\-Faktor\\-Authentifizierung')) is not None:
             print('INFO: 2FA is not used.')
             return response
         if (not totp_secret) or (not totp_devicename):
@@ -63,12 +65,9 @@ class CertbotStratoApi:
         param = {'identifier': username}
 
         # Set parameter 'totp_token'
-        result = re.search(
-            r'<input type="hidden" name="totp_token" '
-            r'value="(?P<totp_token>\w+)">',
-            response.text)
-        if result:
-            param['totp_token'] = result.group('totp_token')
+        totp_input = soup.find('input', attrs={'type': 'hidden', 'name': 'totp_token'})
+        if totp_input is not None:
+            param['totp_token'] = totp_input['value']
         else:
             print('ERROR: Parsing error on 2FA site by totp_token.')
             return response
@@ -76,6 +75,8 @@ class CertbotStratoApi:
         # Set parameter 'action_customer_login.x'
         param['action_customer_login.x'] = 1
 
+        # No idea what this regex does
+        # TODO: rewrite with beautifulsoup
         # Set parameter pw_id
         for device in re.finditer(
             rf'<option value="(?P<value>(S\.{username}\.\w*))"'
@@ -128,10 +129,10 @@ class CertbotStratoApi:
             totp_secret, totp_devicename)
 
         # Check successful login
-        result = re.search(r'sessionID=(\w+)', request.url)
-        if not result:
+        query_parameters = urllib.parse.parse_qs(request.url)
+        if 'sessionID' not in query_parameters:
             return False
-        self.session_id = result.group(1)
+        self.session_id = query_parameters['sessionID'][0]
         print(f'DEBUG: session_id: {self.session_id}')
         return True
 
@@ -144,20 +145,25 @@ class CertbotStratoApi:
             'cID': 0,
             'node': 'kds_CustomerEntryPage',
         })
-        result = re.search(
-            r'<div class="package-information">.+?<span\s+class="domains_\d+_long[^>]*>.+?'
-            + self.second_level_domain_name.replace('.', r'\.')
-            + r'.+?cID=(?P<cID>\d+)',
-            request.text.replace('\n', ' ')
-            )
-
-        if result is None:
-            print(f'ERROR: Domain {self.second_level_domain_name} not '
-                'found in strato packages. Using fallback cID=1')
-            self.package_id = 1
-            return
-        self.package_id = result.group('cID')
-        print(f'INFO: strato package id (cID): {self.package_id}')
+        soup = BeautifulSoup(request.text, 'html.parser')
+        package_element = soup.select_one(f'div.package-information:-soup-contains("{self.second_level_domain_name}")')
+        if package_element is not None:
+            if package_element.has_attr('id') and package_element['id'].startswith('package_information_'):
+                self.package_id = package_element['id'][20:] # remove prefix 'package_information_'
+                print(f'INFO: strato package id (cID): {self.package_id}')
+                return
+            else:
+                # Old page layout: still relevant?
+                customer_link = package_element.find_next('a', class_='customer-link')['href']
+                query_parameters = urllib.parse.parse_qs(customer_link)
+                if 'cID' in query_parameters:
+                    self.package_id = query_parameters['cID'][0]
+                    print(f'INFO: strato package id (cID): {self.package_id}')
+                    return
+        
+        print(f'ERROR: Domain {self.second_level_domain_name} not '
+            'found in strato packages. Using fallback cID=1')
+        self.package_id = 1
 
 
     def get_txt_records(self) -> None:
@@ -169,6 +175,8 @@ class CertbotStratoApi:
             'action_show_txt_records': '',
             'vhost': self.domain_name
         })
+        # No idea what this regex does
+        # TODO: rewrite with beautifulsoup
         for record in re.finditer(
                 r'<select [^>]*name="type"[^>]*>.*?'
                 r'<option[^>]*value="(?P<type>[^"]*)"[^>]*selected[^>]*>'
