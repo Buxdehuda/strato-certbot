@@ -129,7 +129,8 @@ class CertbotStratoApi:
             totp_secret, totp_devicename)
 
         # Check successful login
-        query_parameters = urllib.parse.parse_qs(request.url)
+        parsed_url = urllib.parse.urlparse(request.url)
+        query_parameters = urllib.parse.parse_qs(parsed_url.query)
         if 'sessionID' not in query_parameters:
             return False
         self.session_id = query_parameters['sessionID'][0]
