@@ -154,12 +154,13 @@ class CertbotStratoApi:
                 return
             else:
                 # Old page layout: still relevant?
-                customer_link = package_element.find_next('a', class_='customer-link')['href']
-                query_parameters = urllib.parse.parse_qs(customer_link)
-                if 'cID' in query_parameters:
-                    self.package_id = query_parameters['cID'][0]
-                    print(f'INFO: strato package id (cID): {self.package_id}')
-                    return
+                customer_link = package_element.find_next('a', class_='customer-link')
+                if customer_link is not None and customer_link.has_attr('href'):
+                    query_parameters = urllib.parse.parse_qs(customer_link['href'])
+                    if 'cID' in query_parameters:
+                        self.package_id = query_parameters['cID'][0]
+                        print(f'INFO: strato package id (cID): {self.package_id}')
+                        return
         
         print(f'ERROR: Domain {self.second_level_domain_name} not '
             'found in strato packages. Using fallback cID=1')
