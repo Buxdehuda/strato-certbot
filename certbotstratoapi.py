@@ -55,7 +55,7 @@ class CertbotStratoApi:
         """
         # Is 2FA used
         soup = BeautifulSoup(response.text, 'html.parser')
-        if soup.find('h1', string=re.compile('Zwei\\-Faktor\\-Authentifizierung')) is not None:
+        if soup.find('h1', string=re.compile('Zwei\\-Faktor\\-Authentifizierung')) is None:
             print('INFO: 2FA is not used.')
             return response
         if (not totp_secret) or (not totp_devicename):
