@@ -147,10 +147,15 @@ class CertbotStratoApi:
             'node': 'kds_CustomerEntryPage',
         })
         soup = BeautifulSoup(request.text, 'html.parser')
-        package_element = soup.select_one(f'div.package-information:-soup-contains("{self.second_level_domain_name}")')
-        if package_element is not None:
-            if package_element.has_attr('id') and package_element['id'].startswith('package_information_'):
-                self.package_id = package_element['id'][20:] # remove prefix 'package_information_'
+        package_anchor = soup.select_one(
+            '#package_list > tbody >'
+            f' tr:has(.package-information:-soup-contains("{self.second_level_domain_name}"))'
+            ' .jss_with_own_packagename a'
+        )
+        if package_anchor:
+            if package_anchor.has_attr('href'):
+                link_target = urllib.parse.urlparse(package_anchor["href"])
+                self.package_id = urllib.parse.parse_qs(link_target.query)["cID"][0]
                 print(f'INFO: strato package id (cID): {self.package_id}')
                 return
             else:
