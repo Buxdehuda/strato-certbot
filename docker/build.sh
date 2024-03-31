@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build  -t stratobot ..
+docker build -f Dockerfile -t stratobot ..
