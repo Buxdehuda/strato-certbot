@@ -57,9 +57,12 @@ This will generate a wildcard certificate for your domain without the need to ma
 
 ## Docker
 
-The Dockerfile wraps these hook scripts into a certbot runtime
+The Dockerfile wraps these hook scripts into a certbot runtime.
+The result is a volume with certificates.
 
 ### Setup
+
+Change into the `docker` directory.
 
 Edit and copy the certbot.env.sample to certbot.env
 
