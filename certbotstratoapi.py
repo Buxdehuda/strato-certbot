@@ -118,11 +118,10 @@ class CertbotStratoApi:
         """
         # request session id
         self.http_session.get(self.api_url)
-        request = self.http_session.post(self.api_url, {
-            'identifier': username,
-            'passwd': password,
-            'action_customer_login.x': 'Login'
-        })
+        data={'identifier': username, 'passwd': password, 'action_customer_login.x': 'Login'}
+        headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:126.0) Gecko/20100101 Firefox/126.0'}
+
+        request = self.http_session.post(self.api_url, headers=headers, data=data)
 
         # Check 2FA Login
         request = self.login_2fa(request, username,
