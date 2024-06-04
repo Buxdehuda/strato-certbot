@@ -22,14 +22,15 @@ class CertbotStratoApi:
         self.domain_name = os.environ['CERTBOT_DOMAIN']
         self.second_level_domain_name = re.search(r'([\w-]+\.[\w-]+)$',
             self.domain_name).group(1)
-
         print(f'INFO: txt_key: {self.txt_key}')
         print(f'INFO: txt_value: {self.txt_value}')
         print(f'INFO: second_level_domain_name: {self.second_level_domain_name}')
         print(f'INFO: domain_name: {self.domain_name}')
 
         # setup session for cookie sharing
+        headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:126.0) Gecko/20100101 Firefox/126.0'}
         self.http_session = requests.session()
+        self.http_session.headers.update(headers)
 
         # Set later
         self.session_id = ''
@@ -119,9 +120,8 @@ class CertbotStratoApi:
         # request session id
         self.http_session.get(self.api_url)
         data={'identifier': username, 'passwd': password, 'action_customer_login.x': 'Login'}
-        headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:126.0) Gecko/20100101 Firefox/126.0'}
 
-        request = self.http_session.post(self.api_url, headers=headers, data=data)
+        request = self.http_session.post(self.api_url, data=data)
 
         # Check 2FA Login
         request = self.login_2fa(request, username,
