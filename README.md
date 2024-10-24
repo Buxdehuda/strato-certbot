@@ -51,7 +51,9 @@ Sometimes it takes a while until the desired DNS record is published, which allo
 
 Run Certbot in manual mode:
 
-`sudo certbot certonly --manual --preferred-challenges dns --manual-auth-hook $(pwd)/auth-hook.py --manual-cleanup-hook $(pwd)/cleanup-hook.py -d example.com -d *.example.com`
+```shell
+sudo certbot certonly --manual --preferred-challenges dns --manual-auth-hook "$(pwd)/auth-hook.py strato-auth.json" --manual-cleanup-hook "$(pwd)/cleanup-hook.py strato-auth.json" -d example.com -d *.example.com
+```
 
 This will generate a wildcard certificate for your domain without the need to manually enter the TXT records.
 
