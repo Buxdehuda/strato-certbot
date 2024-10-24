@@ -11,7 +11,7 @@ def main():
     """Run cleanup hook."""
     # get authentication data
     with open(
-            os.path.dirname(__file__) + os.path.normcase('/strato-auth.json'),
+            os.path.dirname(__file__) + os.path.normcase('/'+sys.argv[1]),
             encoding='UTF-8',
             ) as file:
         auth = json.load(file)
