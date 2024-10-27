@@ -11,17 +11,36 @@ from certbotstratoapi import CertbotStratoApi
 def main():
     """Run authentification hook."""
     # get authentication data
-    with open(
-            os.path.dirname(__file__) + os.path.normcase('/strato-auth.json'),
-            encoding='UTF-8',
-            ) as file:
-        auth = json.load(file)
-        username = auth.get('username')
-        password = auth.get('password')
-        totp_secret = auth.get('totp_secret')
-        totp_devicename = auth.get('totp_devicename')
-        waiting_time = auth.get('waiting_time', 0)
-        api_url = auth.get('api_url')
+
+    #check if environment variable exists
+    if 'STRATO_AUTH_ENV_ENABLE' in os.environ:
+        username = os.environ.get('STRATO_USERNAME')
+        password = os.environ.get('STRATO_PASSWORD')
+        totp_secret = os.environ.get('STRATO_TOTP_SECRET')
+        totp_devicename = os.environ.get('STRATO_TOTP_DEVICENAME')
+        #parse string as int
+        waiting_time = int(os.environ.get('STRATO_WAITING_TIME', 0))
+        api_url = os.environ.get('STRATO_API_URL')
+    else:
+        print(os.environ.get('STRATO_AUTH_ENV_ENABLE'))
+        #if argument exists, use it as path to auth.json
+        if len(sys.argv) != 2:
+            print('No path to auth.json provided. Using default.')
+            auth_path = "strato-auth.json"
+        else:
+            auth_path = sys.argv[1]
+
+        with open(
+                os.path.dirname(__file__) + os.path.normcase('/'+auth_path),
+                encoding='UTF-8',
+                ) as file:
+            auth = json.load(file)
+            username = auth.get('username')
+            password = auth.get('password')
+            totp_secret = auth.get('totp_secret')
+            totp_devicename = auth.get('totp_devicename')
+            waiting_time = auth.get('waiting_time', 0)
+            api_url = auth.get('api_url')
 
     strato = CertbotStratoApi(api_url)
     if not strato.login(username, password, totp_secret, totp_devicename):
