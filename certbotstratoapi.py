@@ -22,10 +22,12 @@ class CertbotStratoApi:
         self.domain_name = os.environ['CERTBOT_DOMAIN']
         self.second_level_domain_name = re.search(r'([\w-]+\.[\w-]+)$',
             self.domain_name).group(1)
+        self.subdomain = self.extract_subdomain()
         print(f'INFO: txt_key: {self.txt_key}')
         print(f'INFO: txt_value: {self.txt_value}')
         print(f'INFO: second_level_domain_name: {self.second_level_domain_name}')
         print(f'INFO: domain_name: {self.domain_name}')
+        print(f'INFO: subdomain: {self.subdomain}')
 
         # setup session for cookie sharing
         headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:126.0) Gecko/20100101 Firefox/126.0'}
@@ -163,6 +165,16 @@ class CertbotStratoApi:
         self.package_id = 1
 
 
+    def extract_subdomain(self) -> str:
+        if self.domain_name == self.second_level_domain_name:
+            return ""
+        if self.domain_name.endswith(self.second_level_domain_name):
+            # Compatibility with Python versions before 3.9: using 
+            # len()-based method instead of removesuffix()
+            subdomain = self.domain_name[: -len("." + self.second_level_domain_name)]
+            return subdomain
+        raise ValueError(f"Domain name {self.domain_name} does not end with {self.second_level_domain_name}")
+
     def get_txt_records(self) -> None:
         """Requests all txt and cname records related to domain."""
         request = self.http_session.get(self.api_url, params={
@@ -222,12 +234,14 @@ class CertbotStratoApi:
 
     def set_amce_record(self) -> None:
         """Set or replace AMCE txt record on domain."""
-        self.add_txt_record(self.txt_key, 'TXT', self.txt_value)
+        key = f'{self.txt_key}.{self.subdomain}' if self.subdomain else self.txt_key
+        self.add_txt_record(key, 'TXT', self.txt_value)
 
 
     def reset_amce_record(self) -> None:
         """Reset AMCE txt record on domain."""
-        self.remove_txt_record(self.txt_key, 'TXT')
+        key = f'{self.txt_key}.{self.subdomain}' if self.subdomain else self.txt_key
+        self.remove_txt_record(key, 'TXT')
 
 
     def push_txt_records(self) -> None:
