@@ -23,9 +23,9 @@ def main():
         api_url = os.environ.get('STRATO_API_URL')
     else:
         print(os.environ.get('STRATO_AUTH_ENV_ENABLE'))
-        #if argument exists, use it as path to auth.json
+        #if argument exists, use it as path to strato-auth.json
         if len(sys.argv) != 2:
-            print('No path to auth.json provided. Using default.')
+            print('No path to strato-auth.json provided. Using default.')
             auth_path = "strato-auth.json"
         else:
             auth_path = sys.argv[1]
