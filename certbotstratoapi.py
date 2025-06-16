@@ -198,7 +198,7 @@ class CertbotStratoApi:
                 "cID": self.package_id,
                 "node": "ManageDomains",
                 "action_show_txt_records": "",
-                "vhost": self.domain_name,
+                "vhost": self.second_level_domain_name,
             },
         )
         # No idea what this regex does
@@ -279,7 +279,7 @@ class CertbotStratoApi:
                 "sessionID": self.session_id,
                 "cID": self.package_id,
                 "node": "ManageDomains",
-                "vhost": self.domain_name,
+                "vhost": self.second_level_domain_name,
                 "spf_type": "NONE",
                 "prefix": [r["prefix"] for r in self.records],
                 "type": [r["type"] for r in self.records],
