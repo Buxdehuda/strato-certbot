@@ -18,13 +18,28 @@ class CertbotStratoApi:
             self.api_url = "https://www.strato.de/apps/CustomerService"
         else:
             self.api_url = api_url
-        self.txt_key = "_acme-challenge"
-        self.txt_value = os.environ["CERTBOT_VALIDATION"]
-        self.domain_name = os.environ["CERTBOT_DOMAIN"]
-        self.second_level_domain_name = re.search(
-            r"([\w-]+\.[\w-]+)$", self.domain_name
-        ).group(1)
+
+        self.acme_challenge_label = "_acme-challenge"
+
+        # Domain of the requested certificate
+        #   root-zone period and acme-challenge lable will be removed
+        # _acme-challenge.subdomain.example.com. -> subdomain.example.com
+        self.domain_name = re.sub(f"^{self.acme_challenge_label}\\.|\\.$", "", os.environ["CERTBOT_DOMAIN"])
+        # Second Level Domain:
+        # example.com
+        self.second_level_domain_name = re.search(r"([\w-]+\.[\w-]+)$",self.domain_name).group(1)
+        # Subdomain: All parts under the second level domain
+        # subdomain.example.com -> subdomain
         self.subdomain = self.extract_subdomain()
+
+        # TXT-Record key combination of acme-challenge label and subdomain if exists
+        self.txt_key = self.acme_challenge_label + ("" if len(self.subdomain) == 0 else "." + self.subdomain)
+        self.txt_value = os.environ["CERTBOT_VALIDATION"]
+
+        print(f"INFO: domain_name: {self.domain_name}")
+        print(f"INFO: second_level_domain_name: {self.second_level_domain_name}")
+        print(f"INFO: subdomain: {self.subdomain}")
+
         print(f"INFO: txt_key: {self.txt_key}")
         print(f"INFO: txt_value: {self.txt_value}")
         print(f"INFO: second_level_domain_name: {self.second_level_domain_name}")
