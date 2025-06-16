@@ -201,23 +201,28 @@ class CertbotStratoApi:
                 "vhost": self.domain_name,
             },
         )
-        # No idea what this regex does
-        # TODO: rewrite with beautifulsoup
-        for record in re.finditer(
-            r'<select [^>]*name="type"[^>]*>.*?'
-            r'<option[^>]*value="(?P<type>[^"]*)"[^>]*selected[^>]*>'
-            r".*?</select>.*?"
-            r'<input [^>]*value="(?P<prefix>[^"]*)"[^>]*name="prefix"[^>]*>'
-            r'.*?<textarea [^>]*name="value"[^>]*>(?P<value>.*?)</textarea>',
-            request.text,
-        ):
-            self.records.append(
-                {
-                    "prefix": record.group("prefix"),
-                    "type": record.group("type"),
-                    "value": record.group("value"),
-                }
-            )
+
+        soup = BeautifulSoup(request.text, "html.parser")
+
+        for recordElement in soup.select("div.txt-record-tmpl"):
+            prefix_element = recordElement.select_one("input[name='prefix']")
+            if prefix_element is None:
+                raise AttributeError('Element for record attribute "prefix" not found')
+            prefix = prefix_element.attrs["value"]
+
+            type_element = recordElement.select_one("select[name='type'] option[selected]")
+            if type_element is None:
+                raise AttributeError('Element for record attribute "type" not found')
+            type = type_element.text
+            if not type in ["TXT", "CNAME"]:
+                raise TypeError(f'Attribute "type" with value "{type}" must be a value of: TXT, CNAME')
+
+            value_element = recordElement.select_one("textarea[name='value']")
+            if value_element is None:
+                raise AttributeError('Element for record attribute "value" not found')
+            value = value_element.text
+
+            self.add_txt_record(prefix, type, value)
 
         print("INFO: Current cname/txt records:")
         list(
