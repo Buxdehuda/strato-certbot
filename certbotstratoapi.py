@@ -42,9 +42,6 @@ class CertbotStratoApi:
 
         print(f"INFO: txt_key: {self.txt_key}")
         print(f"INFO: txt_value: {self.txt_value}")
-        print(f"INFO: second_level_domain_name: {self.second_level_domain_name}")
-        print(f"INFO: domain_name: {self.domain_name}")
-        print(f"INFO: subdomain: {self.subdomain}")
 
         # setup session for cookie sharing
         headers = {
@@ -59,11 +56,11 @@ class CertbotStratoApi:
         self.records = []
 
     def login_2fa(
-        self,
-        response: requests.Response,
-        username: str,
-        totp_secret: str,
-        totp_devicename: str,
+            self,
+            response: requests.Response,
+            username: str,
+            totp_secret: str,
+            totp_devicename: str,
     ) -> requests.Response:
         """Login with Two-factor authentication by TOTP on Strato website.
 
@@ -77,8 +74,8 @@ class CertbotStratoApi:
         # Is 2FA used
         soup = BeautifulSoup(response.text, "html.parser")
         if (
-            soup.find("h1", string=re.compile("Zwei\\-Faktor\\-Authentifizierung"))
-            is None
+                soup.find("h1", string=re.compile("Zwei\\-Faktor\\-Authentifizierung"))
+                is None
         ):
             print("INFO: 2FA is not used.")
             return response
@@ -103,9 +100,9 @@ class CertbotStratoApi:
         # TODO: rewrite with beautifulsoup
         # Set parameter pw_id
         for device in re.finditer(
-            rf'<option value="(?P<value>(S\.{username}\.\w*))"'
-            r'( selected(="selected")?)?\s*>(?P<name>(.+?))</option>',
-            response.text,
+                rf'<option value="(?P<value>(S\.{username}\.\w*))"'
+                r'( selected(="selected")?)?\s*>(?P<name>(.+?))</option>',
+                response.text,
         ):
             if totp_devicename.strip() == device.group("name").strip():
                 param["pw_id"] = device.group("value")
@@ -122,11 +119,11 @@ class CertbotStratoApi:
         return request
 
     def login(
-        self,
-        username: str,
-        password: str,
-        totp_secret: str = None,
-        totp_devicename: str = None,
+            self,
+            username: str,
+            password: str,
+            totp_secret: str = None,
+            totp_devicename: str = None,
     ) -> bool:
         """Login to Strato website. Requests session ID.
 
@@ -219,12 +216,12 @@ class CertbotStratoApi:
         # No idea what this regex does
         # TODO: rewrite with beautifulsoup
         for record in re.finditer(
-            r'<select [^>]*name="type"[^>]*>.*?'
-            r'<option[^>]*value="(?P<type>[^"]*)"[^>]*selected[^>]*>'
-            r".*?</select>.*?"
-            r'<input [^>]*value="(?P<prefix>[^"]*)"[^>]*name="prefix"[^>]*>'
-            r'.*?<textarea [^>]*name="value"[^>]*>(?P<value>.*?)</textarea>',
-            request.text,
+                r'<select [^>]*name="type"[^>]*>.*?'
+                r'<option[^>]*value="(?P<type>[^"]*)"[^>]*selected[^>]*>'
+                r".*?</select>.*?"
+                r'<input [^>]*value="(?P<prefix>[^"]*)"[^>]*name="prefix"[^>]*>'
+                r'.*?<textarea [^>]*name="value"[^>]*>(?P<value>.*?)</textarea>',
+                request.text,
         ):
             self.records.append(
                 {
@@ -265,20 +262,18 @@ class CertbotStratoApi:
         """
         for i in reversed(range(len(self.records))):
             if (
-                self.records[i]["prefix"] == prefix
-                and self.records[i]["type"] == record_type
+                    self.records[i]["prefix"] == prefix
+                    and self.records[i]["type"] == record_type
             ):
                 self.records.pop(i)
 
     def set_amce_record(self) -> None:
         """Set or replace AMCE txt record on domain."""
-        key = f"{self.txt_key}.{self.subdomain}" if self.subdomain else self.txt_key
-        self.add_txt_record(key, "TXT", self.txt_value)
+        self.add_txt_record(self.txt_key, "TXT", self.txt_value)
 
     def reset_amce_record(self) -> None:
         """Reset AMCE txt record on domain."""
-        key = f"{self.txt_key}.{self.subdomain}" if self.subdomain else self.txt_key
-        self.remove_txt_record(key, "TXT")
+        self.remove_txt_record(self.txt_key, "TXT")
 
     def push_txt_records(self) -> None:
         """Push modified txt records to Strato."""
