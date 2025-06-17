@@ -56,11 +56,11 @@ class CertbotStratoApi:
         self.records = []
 
     def login_2fa(
-            self,
-            response: requests.Response,
-            username: str,
-            totp_secret: str,
-            totp_devicename: str,
+        self,
+        response: requests.Response,
+        username: str,
+        totp_secret: str,
+        totp_devicename: str,
     ) -> requests.Response:
         """Login with Two-factor authentication by TOTP on Strato website.
 
@@ -74,8 +74,8 @@ class CertbotStratoApi:
         # Is 2FA used
         soup = BeautifulSoup(response.text, "html.parser")
         if (
-                soup.find("h1", string=re.compile("Zwei\\-Faktor\\-Authentifizierung"))
-                is None
+            soup.find("h1", string=re.compile("Zwei\\-Faktor\\-Authentifizierung"))
+            is None
         ):
             print("INFO: 2FA is not used.")
             return response
@@ -100,9 +100,9 @@ class CertbotStratoApi:
         # TODO: rewrite with beautifulsoup
         # Set parameter pw_id
         for device in re.finditer(
-                rf'<option value="(?P<value>(S\.{username}\.\w*))"'
-                r'( selected(="selected")?)?\s*>(?P<name>(.+?))</option>',
-                response.text,
+            rf'<option value="(?P<value>(S\.{username}\.\w*))"'
+            r'( selected(="selected")?)?\s*>(?P<name>(.+?))</option>',
+            response.text,
         ):
             if totp_devicename.strip() == device.group("name").strip():
                 param["pw_id"] = device.group("value")
@@ -119,11 +119,11 @@ class CertbotStratoApi:
         return request
 
     def login(
-            self,
-            username: str,
-            password: str,
-            totp_secret: str = None,
-            totp_devicename: str = None,
+        self,
+        username: str,
+        password: str,
+        totp_secret: str = None,
+        totp_devicename: str = None,
     ) -> bool:
         """Login to Strato website. Requests session ID.
 
@@ -213,23 +213,28 @@ class CertbotStratoApi:
                 "vhost": self.second_level_domain_name,
             },
         )
-        # No idea what this regex does
-        # TODO: rewrite with beautifulsoup
-        for record in re.finditer(
-                r'<select [^>]*name="type"[^>]*>.*?'
-                r'<option[^>]*value="(?P<type>[^"]*)"[^>]*selected[^>]*>'
-                r".*?</select>.*?"
-                r'<input [^>]*value="(?P<prefix>[^"]*)"[^>]*name="prefix"[^>]*>'
-                r'.*?<textarea [^>]*name="value"[^>]*>(?P<value>.*?)</textarea>',
-                request.text,
-        ):
-            self.records.append(
-                {
-                    "prefix": record.group("prefix"),
-                    "type": record.group("type"),
-                    "value": record.group("value"),
-                }
-            )
+
+        soup = BeautifulSoup(request.text, "html.parser")
+
+        for recordElement in soup.select("div.txt-record-tmpl"):
+            prefix_element = recordElement.select_one("input[name='prefix']")
+            if prefix_element is None:
+                raise AttributeError('Element for record attribute "prefix" not found')
+            prefix = prefix_element.attrs["value"]
+
+            type_element = recordElement.select_one("select[name='type'] option[selected]")
+            if type_element is None:
+                raise AttributeError('Element for record attribute "type" not found')
+            type = type_element.text
+            if not type in ["TXT", "CNAME"]:
+                raise TypeError(f'Attribute "type" with value "{type}" must be a value of: TXT, CNAME')
+
+            value_element = recordElement.select_one("textarea[name='value']")
+            if value_element is None:
+                raise AttributeError('Element for record attribute "value" not found')
+            value = value_element.text
+
+            self.add_txt_record(prefix, type, value)
 
         print("INFO: Current cname/txt records:")
         list(
@@ -262,8 +267,8 @@ class CertbotStratoApi:
         """
         for i in reversed(range(len(self.records))):
             if (
-                    self.records[i]["prefix"] == prefix
-                    and self.records[i]["type"] == record_type
+                self.records[i]["prefix"] == prefix
+                and self.records[i]["type"] == record_type
             ):
                 self.records.pop(i)
 
