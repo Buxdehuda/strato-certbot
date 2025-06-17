@@ -18,18 +18,30 @@ class CertbotStratoApi:
             self.api_url = "https://www.strato.de/apps/CustomerService"
         else:
             self.api_url = api_url
-        self.txt_key = "_acme-challenge"
-        self.txt_value = os.environ["CERTBOT_VALIDATION"]
-        self.domain_name = os.environ["CERTBOT_DOMAIN"]
-        self.second_level_domain_name = re.search(
-            r"([\w-]+\.[\w-]+)$", self.domain_name
-        ).group(1)
+
+        self.acme_challenge_label = "_acme-challenge"
+
+        # Domain of the requested certificate
+        #   root-zone period and acme-challenge lable will be removed
+        # _acme-challenge.subdomain.example.com. -> subdomain.example.com
+        self.domain_name = re.sub(f"^{self.acme_challenge_label}\\.|\\.$", "", os.environ["CERTBOT_DOMAIN"])
+        # Second Level Domain:
+        # example.com
+        self.second_level_domain_name = re.search(r"([\w-]+\.[\w-]+)$",self.domain_name).group(1)
+        # Subdomain: All parts under the second level domain
+        # subdomain.example.com -> subdomain
         self.subdomain = self.extract_subdomain()
+
+        # TXT-Record key combination of acme-challenge label and subdomain if exists
+        self.txt_key = self.acme_challenge_label + ("" if len(self.subdomain) == 0 else "." + self.subdomain)
+        self.txt_value = os.environ["CERTBOT_VALIDATION"]
+
+        print(f"INFO: domain_name: {self.domain_name}")
+        print(f"INFO: second_level_domain_name: {self.second_level_domain_name}")
+        print(f"INFO: subdomain: {self.subdomain}")
+
         print(f"INFO: txt_key: {self.txt_key}")
         print(f"INFO: txt_value: {self.txt_value}")
-        print(f"INFO: second_level_domain_name: {self.second_level_domain_name}")
-        print(f"INFO: domain_name: {self.domain_name}")
-        print(f"INFO: subdomain: {self.subdomain}")
 
         # setup session for cookie sharing
         headers = {
@@ -84,17 +96,12 @@ class CertbotStratoApi:
         # Set parameter 'action_customer_login.x'
         param["action_customer_login.x"] = 1
 
-        # No idea what this regex does
-        # TODO: rewrite with beautifulsoup
         # Set parameter pw_id
-        for device in re.finditer(
-            rf'<option value="(?P<value>(S\.{username}\.\w*))"'
-            r'( selected(="selected")?)?\s*>(?P<name>(.+?))</option>',
-            response.text,
-        ):
-            if totp_devicename.strip() == device.group("name").strip():
-                param["pw_id"] = device.group("value")
+        for device in soup.select(f"option[value*='{username}']"):
+            if totp_devicename.strip() == device.text.strip():
+                param["pw_id"] = device.attrs["value"]
                 break
+
         if param.get("pw_id") is None:
             print("ERROR: Parsing error on 2FA site by device name.")
             return response
@@ -198,7 +205,7 @@ class CertbotStratoApi:
                 "cID": self.package_id,
                 "node": "ManageDomains",
                 "action_show_txt_records": "",
-                "vhost": self.domain_name,
+                "vhost": self.second_level_domain_name,
             },
         )
 
@@ -262,13 +269,11 @@ class CertbotStratoApi:
 
     def set_amce_record(self) -> None:
         """Set or replace AMCE txt record on domain."""
-        key = f"{self.txt_key}.{self.subdomain}" if self.subdomain else self.txt_key
-        self.add_txt_record(key, "TXT", self.txt_value)
+        self.add_txt_record(self.txt_key, "TXT", self.txt_value)
 
     def reset_amce_record(self) -> None:
         """Reset AMCE txt record on domain."""
-        key = f"{self.txt_key}.{self.subdomain}" if self.subdomain else self.txt_key
-        self.remove_txt_record(key, "TXT")
+        self.remove_txt_record(self.txt_key, "TXT")
 
     def push_txt_records(self) -> None:
         """Push modified txt records to Strato."""
@@ -284,7 +289,7 @@ class CertbotStratoApi:
                 "sessionID": self.session_id,
                 "cID": self.package_id,
                 "node": "ManageDomains",
-                "vhost": self.domain_name,
+                "vhost": self.second_level_domain_name,
                 "spf_type": "NONE",
                 "prefix": [r["prefix"] for r in self.records],
                 "type": [r["type"] for r in self.records],
