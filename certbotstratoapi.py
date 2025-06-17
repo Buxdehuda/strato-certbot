@@ -96,17 +96,12 @@ class CertbotStratoApi:
         # Set parameter 'action_customer_login.x'
         param["action_customer_login.x"] = 1
 
-        # No idea what this regex does
-        # TODO: rewrite with beautifulsoup
         # Set parameter pw_id
-        for device in re.finditer(
-            rf'<option value="(?P<value>(S\.{username}\.\w*))"'
-            r'( selected(="selected")?)?\s*>(?P<name>(.+?))</option>',
-            response.text,
-        ):
-            if totp_devicename.strip() == device.group("name").strip():
-                param["pw_id"] = device.group("value")
+        for device in soup.select(f"option[value*='{username}']"):
+            if totp_devicename.strip() == device.text.strip():
+                param["pw_id"] = device.attrs["value"]
                 break
+
         if param.get("pw_id") is None:
             print("ERROR: Parsing error on 2FA site by device name.")
             return response
