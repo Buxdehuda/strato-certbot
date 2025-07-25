@@ -5,6 +5,7 @@ import re
 import urllib
 
 import pyotp
+import time     
 import requests
 from bs4 import BeautifulSoup
 
@@ -140,6 +141,7 @@ class CertbotStratoApi:
             "action_customer_login.x": "Login",
         }
 
+        time.sleep(2)
         request = self.http_session.post(self.api_url, data=data)
 
         # Check 2FA Login
